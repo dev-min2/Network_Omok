@@ -1,0 +1,38 @@
+//HLSL->c언와 유사하다.
+//정점쉐이더는 반드시 float4:SV_POSITION(레지스터)로 반환한다.
+//정점버퍼의 정점1개마다 호출된다.
+//POSITION(시멘틱:의미구조)
+
+// 정점좌표,텍스쳐좌표가 들어있는 구조체.
+struct VS_OUTPUT
+{
+	float4 p : SV_POSITION;
+	float2 t : TEXCOORD0;
+};
+
+cbuffer cb0 : register(b0)
+{
+   float4 color : packoffset(c0);
+   float4 timer : packoffset(c1);
+}
+
+
+VS_OUTPUT VS(float2 p: POSITION, float2 t : TEXCOORD) 
+{
+	VS_OUTPUT pOut = (VS_OUTPUT)0;
+	pOut.p = float4(p.x,p.y,0.0f,1.0f);
+	pOut.t = t; // 텍스쳐 좌표
+	return pOut;
+}
+
+struct VS_TEST
+{
+	float4 pos : SV_POSITION;
+};
+
+VS_TEST VS2(float2 p: POSITION) 
+{
+	VS_TEST Output;
+	Output.pos = float4(p.x,p.y,0.0f,1.0f);
+	return Output;
+}

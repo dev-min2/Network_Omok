@@ -1,0 +1,14 @@
+struct VS_OUTPUT
+{
+	float4 p : SV_POSITION;
+	float4 c : COLOR0;    // COLOR0 ~ COLOR1
+	float2 t : TEXCOORD0; // TEXCOORD0 ~ TEXCOORD15
+};
+
+VS_OUTPUT VS(float2 p: POSITION, float2 t : TEXCOORD) 
+{
+	VS_OUTPUT pOut = (VS_OUTPUT)0;
+	pOut.p = float4(p.x,p.y,0.0f,1.0f);
+	pOut.t = t; // 텍스쳐 좌표
+	return pOut;
+}

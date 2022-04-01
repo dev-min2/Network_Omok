@@ -1,0 +1,8 @@
+[ODBC]
+DRIVER=ODBC Driver 17 for SQL Server
+TrustServerCertificate=No
+DATABASE=OmokDB
+WSID=DESKTOP-NSCL41E
+APP=Microsoft¢ç Windows¢ç Operating System
+Trusted_Connection=Yes
+SERVER=DESKTOP-NSCL41E

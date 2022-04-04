@@ -10,7 +10,7 @@ void Session::OnCreate()
 	m_sendBuffer.Create();
 	m_receiveBuffer.Create();
 	m_isConnect = true;
-	WaitForPacketReceive(); // ¸ÕÀú Recv¸¦ °É¾îÁà¾ß ÇÑ´Ù.
+	WaitForPacketReceive(); // ë¨¼ì € Recvë¥¼ ê±¸ì–´ì¤˜ì•¼ í•œë‹¤.
 	
 }
 
@@ -28,7 +28,7 @@ void Session::Dispatch(uInt32 transferredBytes, OVERLAPPEDEX* ov)
 		break;
 	case IO_TYPE::IO_SEND:
 		//TODO Send Process
-		SendMsgCheck(transferredBytes, ov); // ´ú º¸³½ µ¥ÀÌÅÍ°¡ ÀÖ´Ù¸é Ã³¸®.
+		SendMsgCheck(transferredBytes, ov); // ëœ ë³´ë‚¸ ë°ì´í„°ê°€ ìˆë‹¤ë©´ ì²˜ë¦¬.
 		break;
 	default:
 		for(int32 i = 0; i < WorkerThreadCount; ++i)
@@ -43,10 +43,10 @@ bool Session::SendMsgCheck(uInt32 transferredBytes, OVERLAPPEDEX* ov)
 	
 	if (!m_isConnect)
 	{
-		std::cout << "[Server] Å¬¶óÀÌ¾ğÆ® ¿¬°á ²÷±è. Session | SendMsgCheck" << std::endl;
+		std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ ì—°ê²° ëŠê¹€. Session | SendMsgCheck" << std::endl;
 		return false;
 	}
-	if (m_isSend) //SendÇÑ SessionÀÇ °æ¿ì¿¡¸¸ ÇØÁ¦.
+	if (m_isSend) //Sendí•œ Sessionì˜ ê²½ìš°ì—ë§Œ í•´ì œ.
 	{
 		if (ov->m_wsaBuf.len == transferredBytes)
 		{
@@ -54,7 +54,7 @@ bool Session::SendMsgCheck(uInt32 transferredBytes, OVERLAPPEDEX* ov)
 			m_isSend = false;
 			::WSASetEvent(m_sendEvent); // Set-Signaled
 		}
-		else // ´ú º¸³½°æ¿ì.
+		else // ëœ ë³´ë‚¸ê²½ìš°.
 		{
 			SendLessProcess(transferredBytes);
 		}
@@ -74,12 +74,12 @@ void Session::CloseConnection()
 
 void Session::SetSockOptKeepAlive()
 {
-	// À¯·É ¼¼¼Ç(¿¬°áÀÌ ²÷¾îÁø ¼¼¼Ç)Å½Áö. https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=corinet&logNo=220771742989
+	// ìœ ë ¹ ì„¸ì…˜(ì—°ê²°ì´ ëŠì–´ì§„ ì„¸ì…˜)íƒì§€. https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=corinet&logNo=220771742989
 	tcp_keepalive tcpk;
 	DWORD ret;
 	tcpk.onoff = 1; // KeepAlive On.
-	tcpk.keepalivetime = 10000; // 10ÃÊ¸¶´Ù KeepAlive½ÅÈ£. -> Default´Â 2½Ã°£.
-	tcpk.keepaliveinterval = 1000; // KeepAlive½ÅÈ£¸¦ º¸³»°í ´äÀåÀÌ¾øÀ¸¸é ´Ù½Ã Àü¼Û.
+	tcpk.keepalivetime = 10000; // 10ì´ˆë§ˆë‹¤ KeepAliveì‹ í˜¸. -> DefaultëŠ” 2ì‹œê°„.
+	tcpk.keepaliveinterval = 1000; // KeepAliveì‹ í˜¸ë¥¼ ë³´ë‚´ê³  ë‹µì¥ì´ì—†ìœ¼ë©´ ë‹¤ì‹œ ì „ì†¡.
 	::WSAIoctl(m_clientInfo.m_clientSocket, SIO_KEEPALIVE_VALS, &tcpk, sizeof(tcp_keepalive), 0, 0, &ret, nullptr, nullptr);
 	
 }
@@ -99,7 +99,7 @@ Session::Session(ClientInfo& client) : m_clientInfo(client),m_receivedPacketSize
 	bool opt = true;
 	::setsockopt(m_clientInfo.m_clientSocket, SOL_SOCKET, SO_KEEPALIVE, (const char*)&opt, sizeof(opt));*/
 
-	::WSASetEvent(m_sendEvent); // Set-Signaled. sendÇÑ SessionÀº ¿¬¼ÓÀûÀ¸·Î Send¸¦ ºÒ°¡´É.
+	::WSASetEvent(m_sendEvent); // Set-Signaled. sendí•œ Sessionì€ ì—°ì†ì ìœ¼ë¡œ Sendë¥¼ ë¶ˆê°€ëŠ¥.
 	
 
 	::ZeroMemory(&m_overlappedRecv, sizeof(OVERLAPPEDEX));
@@ -123,8 +123,8 @@ bool Session::WaitForPacketReceive()
 	DWORD bufSize = PACKET_BUFFER_SIZE - m_receivedPacketSize;
 
 	::ZeroMemory(&m_overlappedRecv, sizeof(OVERLAPPEDEX));
-	char* m_recvBuffer = m_receiveBuffer.AllocateToBuffer(PACKET_BUFFER_SIZE); // ÇÏ³Í¿¡ ¼ö½ÅµÉ ¼ö ÀÖ´Â ¹öÆÛÅ©±â(2048)
-	m_overlappedRecv.m_wsaBuf.buf = m_recvBuffer; // ¼¼¼ÇÀÇ receiveBuffer.
+	char* m_recvBuffer = m_receiveBuffer.AllocateToBuffer(PACKET_BUFFER_SIZE); // í•˜ë„Œì— ìˆ˜ì‹ ë  ìˆ˜ ìˆëŠ” ë²„í¼í¬ê¸°(2048)
+	m_overlappedRecv.m_wsaBuf.buf = m_recvBuffer; // ì„¸ì…˜ì˜ receiveBuffer.
 	m_overlappedRecv.m_wsaBuf.len = PACKET_BUFFER_SIZE;
 	m_overlappedRecv.m_ioType	  = IO_TYPE::IO_RECV;
 
@@ -136,12 +136,12 @@ bool Session::WaitForPacketReceive()
 	if (ret == SOCKET_ERROR && ::WSAGetLastError() != ERROR_IO_PENDING)
 	{
 		int errorCode = ::WSAGetLastError();
-		std::cout << "WSARecv ½ÇÆĞ | Session | WaitForPacketReceive()" << errorCode << std::endl;
+		std::cout << "WSARecv ì‹¤íŒ¨ | Session | WaitForPacketReceive()" << errorCode << std::endl;
 		if (errorCode == 10054)
 		{
-			std::cout << "[Server] Å¬¶óÀÌ¾ğÆ®Ãø¿¡¼­ ¿¬°áÀ» ²÷À½" << std::endl;
+			std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ì¸¡ì—ì„œ ì—°ê²°ì„ ëŠìŒ" << std::endl;
 		}
-		// ¿¬°áÀ» ²÷´Â´Ù.
+		// ì—°ê²°ì„ ëŠëŠ”ë‹¤.
 		m_isConnect = false;
 		return false;
 	}
@@ -149,7 +149,7 @@ bool Session::WaitForPacketReceive()
 	return true;
 }
 
-void Session::BroadCast(Packet& packet) // ¸ğµÎ¿¡°Ô »Ñ¸°´Ù.
+void Session::BroadCast(Packet& packet) // ëª¨ë‘ì—ê²Œ ë¿Œë¦°ë‹¤.
 {
 	
 	auto it = SessionManager::GetInstance()->GetSessions().GetBegin();
@@ -159,7 +159,7 @@ void Session::BroadCast(Packet& packet) // ¸ğµÎ¿¡°Ô »Ñ¸°´Ù.
 		SendPacketToOtherUser(packet, session);
 	}
 
-	std::cout << "[Server] BroadCast(" << SessionManager::GetInstance()->GetSessions().GetSize() << ")! " << packet.GetPacketLen() << " ¹ÙÀÌÆ® ¼Û½Å.." << std::endl;
+	std::cout << "[Server] BroadCast(" << SessionManager::GetInstance()->GetSessions().GetSize() << ")! " << packet.GetPacketLen() << " ë°”ì´íŠ¸ ì†¡ì‹ .." << std::endl;
 	
 }
 
@@ -174,7 +174,7 @@ void Session::SendPacket(Packet& packet)
 	uInt32 packetLen = packet.GetDefaultPacket().m_ph.m_len;
 	DWORD sendBytes = 0, flag = 0;
 
-	char* sendBuffer = m_sendBuffer.AllocateToBuffer(packetLen); // SendMsgCheck¿¡¼­ ÇØÁ¦ÇÊ¿ä.
+	char* sendBuffer = m_sendBuffer.AllocateToBuffer(packetLen); // SendMsgCheckì—ì„œ í•´ì œí•„ìš”.
 	::CopyMemory(sendBuffer, (char*)&packet.GetDefaultPacket(), packetLen);
 
 	m_overlappedSend.m_wsaBuf.buf = sendBuffer;
@@ -184,18 +184,18 @@ void Session::SendPacket(Packet& packet)
 	if (ret == SOCKET_ERROR && ::WSAGetLastError() != ERROR_IO_PENDING)
 	{
 		int errorCode = ::WSAGetLastError();
-		std::cout << "[Server] WSASend ½ÇÆĞ | User | SendPacket() »çÀ¯ : " << errorCode << std::endl;
+		std::cout << "[Server] WSASend ì‹¤íŒ¨ | User | SendPacket() ì‚¬ìœ  : " << errorCode << std::endl;
 		if (errorCode == 10054)
 		{
-			std::cout << "[Server] Å¬¶óÀÌ¾ğÆ®Ãø¿¡¼­ ¿¬°áÀ» ²÷À½" << std::endl;
+			std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ì¸¡ì—ì„œ ì—°ê²°ì„ ëŠìŒ" << std::endl;
 		}
 
-		// ¿¬°áÀ» ²÷´Â´Ù. 
+		// ì—°ê²°ì„ ëŠëŠ”ë‹¤. 
 		this->SetIsConnect(false);
 		return;
 	}
 	char* address = ::inet_ntoa(m_clientInfo.m_clientAddr.sin_addr);
-	std::cout << "[Server] Å¬¶óÀÌ¾ğÆ® " << address << "¿¡°Ô " << packetLen << " ¹ÙÀÌÆ® ¼Û½Å.." << std::endl;
+	std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ " << address << "ì—ê²Œ " << packetLen << " ë°”ì´íŠ¸ ì†¡ì‹ .." << std::endl;
 	this->m_ioSendCnt.fetch_add(1);
 }
 
@@ -210,7 +210,7 @@ void Session::SendPacketToOtherUser(Packet& packet, Session* session)
 	uInt32 packetLen = packet.GetDefaultPacket().m_ph.m_len;
 	DWORD sendBytes = 0, flag = 0;
 
-	//    SendMsgCheck¿¡¼­ ÇØÁ¦ÇÊ¿ä.
+	//    SendMsgCheckì—ì„œ í•´ì œí•„ìš”.
 	char* sendBuffer = session->m_sendBuffer.AllocateToBuffer(packetLen); 
 	::CopyMemory(sendBuffer, (char*)&packet.GetDefaultPacket(), packetLen);
 
@@ -221,18 +221,18 @@ void Session::SendPacketToOtherUser(Packet& packet, Session* session)
 	if (ret == SOCKET_ERROR && ::WSAGetLastError() != ERROR_IO_PENDING)
 	{
 		int errorCode = ::WSAGetLastError();
-		std::cout << "[Server] WSASend ½ÇÆĞ | User | SendPacketToOtherUser() »çÀ¯ : " << errorCode << std::endl;
+		std::cout << "[Server] WSASend ì‹¤íŒ¨ | User | SendPacketToOtherUser() ì‚¬ìœ  : " << errorCode << std::endl;
 		if (errorCode == 10054)
 		{
-			std::cout << "[Server] Å¬¶óÀÌ¾ğÆ®Ãø¿¡¼­ ¿¬°áÀ» ²÷À½" << std::endl;
+			std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ì¸¡ì—ì„œ ì—°ê²°ì„ ëŠìŒ" << std::endl;
 		}
-		// ¿¬°áÀ» ²÷´Â´Ù. 
+		// ì—°ê²°ì„ ëŠëŠ”ë‹¤. 
 		session->SetIsConnect(false);
 		return;	
 	}
 
 	char* address = ::inet_ntoa(session->m_clientInfo.m_clientAddr.sin_addr);
-	std::cout << "[Server] Å¬¶óÀÌ¾ğÆ® " << address << "¿¡°Ô " << packetLen << " ¹ÙÀÌÆ® ¼Û½Å.." << std::endl;
+	//std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ " << address << "ì—ê²Œ " << packetLen << " ë°”ì´íŠ¸ ì†¡ì‹ .." << std::endl;
 	session->m_ioSendCnt.fetch_add(1);
 }
 
@@ -248,7 +248,7 @@ void Session::SendLessProcess(uInt32 transferredBytes)
 	DWORD flags = 0;
 
 	
-	// ´ú º¸³½µ¥ÀÌÅÍ.
+	// ëœ ë³´ë‚¸ë°ì´í„°.
 	char* pLessPtr = m_sendBuffer.ReleaseBuffer(transferredBytes);//&m_overlappedSend.m_wsaBuf.buf[transferredBytes];
 	m_overlappedSend.m_wsaBuf.buf = pLessPtr;
 	m_overlappedSend.m_wsaBuf.len = (m_overlappedSend.m_wsaBuf.len - transferredBytes);
@@ -258,20 +258,20 @@ void Session::SendLessProcess(uInt32 transferredBytes)
 	if (ret == SOCKET_ERROR && ::WSAGetLastError() != ERROR_IO_PENDING)
 	{
 		int errorCode = ::WSAGetLastError();
-		std::cout << "[Server] WSASend ½ÇÆĞ | User | SendLessProcess() »çÀ¯ : " << errorCode << std::endl;
+		std::cout << "[Server] WSASend ì‹¤íŒ¨ | User | SendLessProcess() ì‚¬ìœ  : " << errorCode << std::endl;
 		if (errorCode == 10054)
 		{
-			std::cout << "[Server] Å¬¶óÀÌ¾ğÆ®Ãø¿¡¼­ ¿¬°áÀ» ²÷À½" << std::endl;
+			std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ì¸¡ì—ì„œ ì—°ê²°ì„ ëŠìŒ" << std::endl;
 		}
-		// ¿¬°áÀ» ²÷´Â´Ù. 
+		// ì—°ê²°ì„ ëŠëŠ”ë‹¤. 
 		this->SetIsConnect(false);
 		return;
 	}
-	std::cout << "[Server] Å¬¶óÀÌ¾ğÆ® " << m_clientInfo.m_clientSocket << "¿¡°Ô " << " ´ú ¼Û½ÅµÈ ¹ÙÀÌÆ® " << m_overlappedSend.m_wsaBuf.len << "¼Û½Å.." << std::endl;
+	std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ " << m_clientInfo.m_clientSocket << "ì—ê²Œ " << " ëœ ì†¡ì‹ ëœ ë°”ì´íŠ¸ " << m_overlappedSend.m_wsaBuf.len << "ì†¡ì‹ .." << std::endl;
 	m_ioSendCnt.fetch_add(1);
 }
 
-// ÆĞÅ¶Ã³¸® ºÎºĞ.
+// íŒ¨í‚·ì²˜ë¦¬ ë¶€ë¶„.
 void Session::DispatchReceive(uInt32 transferredBytes, OVERLAPPEDEX* ov)
 {
 	if (!m_isConnect)
@@ -279,26 +279,26 @@ void Session::DispatchReceive(uInt32 transferredBytes, OVERLAPPEDEX* ov)
 	m_isRecv.store(true);
 	Packet packet;
 	
-	// ¼ö½ÅµÈ Å©±â °è»ê.
+	// ìˆ˜ì‹ ëœ í¬ê¸° ê³„ì‚°.
  	m_receivedPacketSize += transferredBytes;
 	packet.m_receivedSize += transferredBytes;
 
-	// ÀÌÀü¿¡ ³²Àº ¼ö½ÅµÈ ¹ÙÀÌÆ®°¡ ¾ø´Ù¸é. ¹Ù·Î ¹öÆÛÀÇ ³»¿ëÀ» packetÀ¸·Î º¹»ç.
-	// ¼ö½ÅµÈ ¸ğµç ÆĞÅ¶À» ¸ğµÎ Ã³¸®
+	// ì´ì „ì— ë‚¨ì€ ìˆ˜ì‹ ëœ ë°”ì´íŠ¸ê°€ ì—†ë‹¤ë©´. ë°”ë¡œ ë²„í¼ì˜ ë‚´ìš©ì„ packetìœ¼ë¡œ ë³µì‚¬.
+	// ìˆ˜ì‹ ëœ ëª¨ë“  íŒ¨í‚·ì„ ëª¨ë‘ ì²˜ë¦¬
 	packet.CopyToPacketBuffer(m_receiveBuffer.GetCurrentReadPos(), m_receivedPacketSize);
 
-	while (m_receivedPacketSize > 0) // 0ÀÌ µÉ¶§±îÁö Ã³¸®.
+	while (m_receivedPacketSize > 0) // 0ì´ ë ë•Œê¹Œì§€ ì²˜ë¦¬.
 	{
-		// Á¦´ë·ÎµÈ ÇÏ³ªÀÇ ÆĞÅ¶ÀÎÁö Ã¼Å©.
+		// ì œëŒ€ë¡œëœ í•˜ë‚˜ì˜ íŒ¨í‚·ì¸ì§€ ì²´í¬.
 		if (packet.IsValidPacketHeader() && m_receivedPacketSize >= packet.GetPacketLen())
 		{
-			uInt16 len = packet.GetPacketLen(); // lenµé¾î°¡´Â ÀÚ¸® ¿ø·¡ packet.GetPacketLen.
-			std::cout << "[Server] Å¬¶óÀÌ¾ğÆ®·Î ºÎÅÍ " << len << " ¹ÙÀÌÆ® ¼ö½Å.." << std::endl;
-			PacketParsing(packet); // Á¦´ë·Î ¼ö½ÅÇß´Ù¸é ÆÄ½Ì. 
+			uInt16 len = packet.GetPacketLen(); // lenë“¤ì–´ê°€ëŠ” ìë¦¬ ì›ë˜ packet.GetPacketLen.
+			std::cout << "[Server] í´ë¼ì´ì–¸íŠ¸ë¡œ ë¶€í„° " << len << " ë°”ì´íŠ¸ ìˆ˜ì‹ .." << std::endl;
+			PacketParsing(packet); // ì œëŒ€ë¡œ ìˆ˜ì‹ í–ˆë‹¤ë©´ íŒŒì‹±. 
 			m_receivedPacketSize -= len;
-			char* nextBuffer = m_receiveBuffer.ReleaseBuffer(len); // ´ÙÀ½ ÆĞÅ¶.
+			char* nextBuffer = m_receiveBuffer.ReleaseBuffer(len); // ë‹¤ìŒ íŒ¨í‚·.
 			packet.m_receivedSize = m_receivedPacketSize;
-			if (m_receivedPacketSize > 0) // ¾ÆÁ÷ ³²Àº ¹ÙÀÌÆ®°¡ ³²¾Ò´Ù¸é. ÀÌ¾î¼­ Ã³¸®.
+			if (m_receivedPacketSize > 0) // ì•„ì§ ë‚¨ì€ ë°”ì´íŠ¸ê°€ ë‚¨ì•˜ë‹¤ë©´. ì´ì–´ì„œ ì²˜ë¦¬.
 			{
 				packet.CopyToPacketBuffer(nextBuffer, m_receivedPacketSize);
 			}
@@ -308,11 +308,11 @@ void Session::DispatchReceive(uInt32 transferredBytes, OVERLAPPEDEX* ov)
 			break;
 		}
 	}
-	if(m_receivedPacketSize <= 0) // ¸ğµÎ Ã³¸® µÇ¾úÀ½.
+	if(m_receivedPacketSize <= 0) // ëª¨ë‘ ì²˜ë¦¬ ë˜ì—ˆìŒ.
 		m_receiveBuffer.ReleaseBuffer(m_receiveBuffer.GetAllocatedBytes());
 	else
 	{
-		// ¾ÆÁ÷ ´ú Ã³¸®µÈ ÆĞÅ¶ÀÌ ³²¾ÆÀÖ´Ù.(´ú ¼ö½Å)
+		// ì•„ì§ ëœ ì²˜ë¦¬ëœ íŒ¨í‚·ì´ ë‚¨ì•„ìˆë‹¤.(ëœ ìˆ˜ì‹ )
 		char* pRemain = m_receiveBuffer.ReleaseBuffer(m_receivedPacketSize); // 20
 		m_receiveBuffer.ReleaseBuffer(m_receiveBuffer.GetAllocatedBytes() - m_receivedPacketSize);
 		char* pWrite = m_receiveBuffer.AllocateToBuffer(m_receivedPacketSize);
@@ -320,7 +320,7 @@ void Session::DispatchReceive(uInt32 transferredBytes, OVERLAPPEDEX* ov)
 	}
 	if (m_isConnect)
 	{
-		WaitForPacketReceive(); // °è¼ÓÇØ¼­ Recv ¿äÃ»
+		WaitForPacketReceive(); // ê³„ì†í•´ì„œ Recv ìš”ì²­
 		m_isRecv.store(false);
 	}
 }
